@@ -55,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout mainFrame;
     private int counter;
     private int eventsDone;
+    private final String TRACKS_FRAGMENT_TAG = "TFTAG";
+    private final String BOOKMARKS_FRAGMENT_TAG = "BFTAG";
+    private final String SPEAKER_FRAGMENT_TAG = "SKFTAG";
+    private final String SPONSORS_FRAGMENT_TAG = "SPFTAG";
+    private final String LOCATION_FRAGMENT_TAG = "LFTAG";
+    private final String MAP_FRAGMENT_TAG = "MFTAG";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +78,13 @@ public class MainActivity extends AppCompatActivity {
         downloadProgress.setIndeterminate(true);
         DataDownload download = new DataDownload();
         download.downloadVersions();
-
         this.findViewById(android.R.id.content).setBackgroundColor(Color.LTGRAY);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, new TracksFragment()).commit();
-
+        if(savedInstanceState==null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, new TracksFragment()).commit();
+        }
     }
 
 
@@ -144,6 +151,30 @@ public class MainActivity extends AppCompatActivity {
     private void setUpToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar != null) {
+            BookmarksFragment bf = (BookmarksFragment)getSupportFragmentManager().findFragmentByTag(BOOKMARKS_FRAGMENT_TAG);
+            if ( null != bf ) {
+                setTitle(getResources().getString(R.string.menu_bookmarks));
+            }
+            TracksFragment tf = (TracksFragment)getSupportFragmentManager().findFragmentByTag(TRACKS_FRAGMENT_TAG);
+            if ( null != tf ) {
+                setTitle(getResources().getString(R.string.menu_tracks));
+            }
+            SpeakerFragment skf = (SpeakerFragment)getSupportFragmentManager().findFragmentByTag(SPEAKER_FRAGMENT_TAG);
+            if ( null != skf ) {
+                setTitle(getResources().getString(R.string.menu_speakers));
+            }
+            SponsorsFragment spf = (SponsorsFragment)getSupportFragmentManager().findFragmentByTag(SPONSORS_FRAGMENT_TAG);
+            if ( null != spf ) {
+                setTitle(getResources().getString(R.string.menu_sponsor));
+            }
+            LocationsFragment lf = (LocationsFragment)getSupportFragmentManager().findFragmentByTag(LOCATION_FRAGMENT_TAG);
+            if ( null != lf ) {
+                setTitle(getResources().getString(R.string.menu_locations));
+            }
+            android.support.v4.app.Fragment ft = getSupportFragmentManager().findFragmentByTag(MAP_FRAGMENT_TAG);
+            if ( null != ft ) {
+                setTitle(getResources().getString(R.string.menu_map));
+            }
             setSupportActionBar(mToolbar);
         }
     }
@@ -195,27 +226,27 @@ public class MainActivity extends AppCompatActivity {
                         switch (id) {
                             case R.id.nav_tracks:
                                 fragmentManager.beginTransaction()
-                                        .replace(R.id.content_frame, new TracksFragment()).commit();
+                                        .replace(R.id.content_frame, new TracksFragment(),TRACKS_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_tracks);
                                 break;
                             case R.id.nav_bookmarks:
                                 fragmentManager.beginTransaction()
-                                        .replace(R.id.content_frame, new BookmarksFragment()).commit();
+                                        .replace(R.id.content_frame, new BookmarksFragment(),BOOKMARKS_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_bookmarks);
                                 break;
                             case R.id.nav_speakers:
                                 fragmentManager.beginTransaction()
-                                        .replace(R.id.content_frame, new SpeakerFragment()).commit();
+                                        .replace(R.id.content_frame, new SpeakerFragment(),SPEAKER_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_speakers);
                                 break;
                             case R.id.nav_sponsors:
                                 fragmentManager.beginTransaction()
-                                        .replace(R.id.content_frame, new SponsorsFragment()).commit();
+                                        .replace(R.id.content_frame, new SponsorsFragment(),SPONSORS_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_sponsor);
                                 break;
                             case R.id.nav_locations:
                                 fragmentManager.beginTransaction()
-                                        .replace(R.id.content_frame, new LocationsFragment()).commit();
+                                        .replace(R.id.content_frame, new LocationsFragment(),LOCATION_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_locations);
                                 break;
                             case R.id.nav_map:
@@ -225,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                                         ((OpenEventApp) getApplication())
                                                 .getMapModuleFactory()
                                                 .provideMapModule()
-                                                .provideMapFragment()).commit();
+                                                .provideMapFragment(),MAP_FRAGMENT_TAG).commit();
                                 getSupportActionBar().setTitle(R.string.menu_map);
                                 break;
                             case R.id.nav_settings:
