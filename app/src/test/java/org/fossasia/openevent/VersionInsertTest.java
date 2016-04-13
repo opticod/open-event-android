@@ -7,7 +7,7 @@ import android.net.Uri;
 import com.google.gson.Gson;
 
 import org.fossasia.openevent.api.Urls;
-import org.fossasia.openevent.data.Session;
+import org.fossasia.openevent.data.Version;
 import org.fossasia.openevent.dbutils.DbContract;
 import org.fossasia.openevent.dbutils.DbHelper;
 import org.fossasia.openevent.dbutils.DbSingleton;
@@ -32,15 +32,15 @@ import java.net.URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+
 /**
  * User: opticod(Anupam Das)
- * Date: 5/4/16
+ * Date: 13/4/16
  */
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 
-public class SessionInsertTest {
-
+public class VersionInsertTest {
     private Activity mActivity;
 
     private SQLiteDatabase database;
@@ -55,14 +55,14 @@ public class SessionInsertTest {
     }
 
     @Test
-    public void testSessionDbInsertionHttp() throws JSONException {
+    public void testTrackDbInsertionHttp() throws JSONException {
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String jsonStr = null;
 
         try {
-            final String BASE_URL = Urls.BASE_GET_URL_ALT + Urls.EVENTS + "/" + Urls.EVENT_ID + "/" + Urls.SESSIONS;
+            final String BASE_URL = Urls.BASE_GET_URL_ALT + Urls.EVENTS + "/" + Urls.EVENT_ID + "/" + Urls.VERSION;
 
             Uri builtUri = Uri.parse(BASE_URL).buildUpon().build();
             URL url = new URL(builtUri.toString());
@@ -99,27 +99,26 @@ public class SessionInsertTest {
         Gson gson = new Gson();
         try {
             JSONObject json = new JSONObject(jsonStr);
-            JSONArray eventJsonArray = json.getJSONArray(Urls.SESSIONS);
+            JSONArray eventJsonArray = json.getJSONArray(Urls.VERSION);
             if (eventJsonArray.length() > 0) {
 
                 JSONObject eventJsonObject = eventJsonArray.getJSONObject(0);
-                Session session = gson.fromJson(String.valueOf(eventJsonObject), Session.class);
+                Version version = gson.fromJson(String.valueOf(eventJsonObject), Version.class);
 
-                String query = session.generateSql();
-                DbSingleton instance = new DbSingleton(mActivity);
-                instance.clearDatabase(DbContract.Sessions.TABLE_NAME);
+                String query = version.generateSql();
+                DbSingleton instance = new DbSingleton(database, mActivity, db);
+                instance.clearDatabase(DbContract.Versions.TABLE_NAME);
                 instance.insertQuery(query);
 
-                Session sessionDetails = instance.getSessionById(session.getId());
-                assertNotNull(sessionDetails);
-                assertEquals(session.getId(), sessionDetails.getId());
-                assertEquals(session.getDescription(), sessionDetails.getDescription());
-                assertEquals(session.getSummary(), sessionDetails.getSummary());
-                assertEquals(session.getStartTime(), sessionDetails.getStartTime());
-                assertEquals(session.getEndTime(), sessionDetails.getEndTime());
-                assertEquals(session.getMicrolocations(), sessionDetails.getMicrolocations());
-                assertEquals(session.getTitle(), sessionDetails.getTitle());
-                assertEquals(session.getTrack(), sessionDetails.getTrack());
+                Version versionDetails = instance.getVersionIds();
+                assertNotNull(versionDetails);
+                assertEquals(version.getId(), versionDetails.getId());
+                assertEquals(version.getEventVer(), versionDetails.getEventVer());
+                assertEquals(version.getMicrolocationsVer(), versionDetails.getMicrolocationsVer());
+                assertEquals(version.getTracksVer(), versionDetails.getTracksVer());
+                assertEquals(version.getSponsorVer(), versionDetails.getSponsorVer());
+                assertEquals(version.getSpeakerVer(), versionDetails.getSpeakerVer());
+                assertEquals(version.getSessionVer(), versionDetails.getSessionVer());
             }
         } catch (JSONException e) {
         }
@@ -131,3 +130,4 @@ public class SessionInsertTest {
         db.close();
     }
 }
+
