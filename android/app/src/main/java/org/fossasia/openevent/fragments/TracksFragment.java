@@ -61,7 +61,7 @@ public class TracksFragment extends Fragment implements SearchView.OnQueryTextLi
 
     private SearchView searchView;
 
-
+    private DbSingleton dbSingleton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,11 +70,11 @@ public class TracksFragment extends Fragment implements SearchView.OnQueryTextLi
         unbinder = ButterKnife.bind(this,view);
 
         OpenEventApp.getEventBus().register(this);
-        DbSingleton dbSingleton = DbSingleton.getInstance();
+        dbSingleton = DbSingleton.getInstance();
         List<Track> mTracks = dbSingleton.getTrackList();
         tracksListAdapter = new TracksListAdapter(mTracks);
         tracksRecyclerView.setAdapter(tracksListAdapter);
-        setVisibility(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(ConstantStrings.IS_DOWNLOAD_DONE, true));
+        setVisibility();
         tracksListAdapter.setOnClickListener(new TracksListAdapter.SetOnClickListener() {
             @Override
             public void onItemClick(int position, View view) {
@@ -100,8 +100,8 @@ public class TracksFragment extends Fragment implements SearchView.OnQueryTextLi
         return view;
     }
 
-    public void setVisibility(Boolean isDownloadDone) {
-        if (isDownloadDone) {
+    public void setVisibility() {
+        if (!dbSingleton.getTrackList().isEmpty()) {
             noTracksView.setVisibility(View.GONE);
             tracksRecyclerView.setVisibility(View.VISIBLE);
         } else {
@@ -171,7 +171,7 @@ public class TracksFragment extends Fragment implements SearchView.OnQueryTextLi
 
     @Subscribe
     public void RefreshData(RefreshUiEvent event) {
-        setVisibility(true);
+        setVisibility();
         if (searchText.length() == 0) {
             tracksListAdapter.refresh();
         }
@@ -199,11 +199,10 @@ public class TracksFragment extends Fragment implements SearchView.OnQueryTextLi
     private void refresh() {
         if (NetworkUtils.haveNetworkConnection(getActivity())) {
             DataDownloadManager.getInstance().downloadTracks();
-            setVisibility(true);
         } else {
             OpenEventApp.getEventBus().post(new TracksDownloadEvent(false));
-            setVisibility(false);
         }
+        setVisibility();
     }
 
 }
